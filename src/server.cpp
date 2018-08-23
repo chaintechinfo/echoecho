@@ -2,15 +2,7 @@
 // Created by niushaohan on 2018/8/22.
 //
 
-#include <cstdio>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <zconf.h>
 #include "server.hpp"
-#include "i_sock.hpp"
-#include "utils.hpp"
-
-using namespace echosock;
 
 int echoserver::main() {
     int len = echoutils::message(const_cast<char *>(" ECHO SERVER "));
@@ -51,6 +43,15 @@ int echoserver::main() {
 
         int pid = fork();
         if (pid == 0) {
+            // son process
+            char buf[1000] = {0};
+            auto recvbytes = static_cast<int>(recv(client_fd, buf, 1000, 0));
+            buf[recvbytes] = '\0';
+            printf("* \tmessage is: %s\n", buf);
+            char * msg = buf;
+            if (send(client_fd, msg, static_cast<size_t>(recvbytes), 0) == -1) {
+                printf("* send error");
+            }
             close(client_fd);
             exit(0);
         }

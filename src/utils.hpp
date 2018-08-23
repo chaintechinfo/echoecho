@@ -1,6 +1,7 @@
 //
 // Created by niushaohan on 2018/8/23.
 //
+#pragma once
 
 #ifndef ECHOECHO_UTILS_HPP
 #define ECHOECHO_UTILS_HPP
@@ -14,30 +15,11 @@ namespace echoutils {
 #define STAR "*"
 #define LENGTH 20
 
-    std::string star_str() {
-        std::string s_;
-        for (int i = 0; i < LENGTH; i++) {
-            s_.append(STAR);
-        }
-        return s_;
-    }
+    std::string star_str();
 
-    int message(char* msg) {
-        std::string result;
-        result.append(star_str());
-        result.append(msg);
-        result.append(star_str());
-        printf("%s\n", result.c_str());
-        return static_cast<int>(result.length());
-    }
+    int message(char* msg);
 
-    void message(int len) {
-        std::string s;
-        for (int i = 0; i < len; i++) {
-            s.append(STAR);
-        }
-        printf("%s\n", s.c_str());
-    }
+    void message(int len);
 }
 
 #endif //ECHOECHO_UTILS_HPP

@@ -1,6 +1,7 @@
 //
 // Created by niushaohan on 2018/8/22.
 //
+#pragma once
 
 #ifndef ECHOECHO_I_SOCK_HPP
 #define ECHOECHO_I_SOCK_HPP
@@ -13,24 +14,12 @@ namespace echosock {
 
     // i_socket
     // Usage: i_socket(AF_INET, SOCK_STREAM, 0)
-    int i_socket(int domain, int type, int protocol) {
-        int fd;
-
-        if ((fd = socket(domain, type, protocol)) == -1) {
-            perror("Get socket error");
-            exit(1);
-        }
-        return fd;
-    }
+    int i_socket(int domain, int type, int protocol);
 
     // i_bind
-    int i_bind(int fd, const struct sockaddr * addr, int namelen) {
-        if (bind(fd, addr, static_cast<socklen_t>(namelen)) == -1) {
+    int i_bind(int fd, const struct sockaddr * addr, int namelen);
 
-        }
-
-        return 0;
-    }
+    // i_recv
 
 }
 
