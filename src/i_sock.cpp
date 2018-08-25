@@ -22,3 +22,20 @@ int echosock::i_bind(int fd, const struct sockaddr *addr, int namelen) {
 
     return 0;
 }
+
+int echosock::i_listen(int fd, int n) {
+    if (listen(fd, n) == -1) {
+        perror("* listen error");
+        exit(1);
+    }
+    return 0;
+}
+
+int echosock::i_recv(int fd, void *buf, int maxsize) {
+    int recvbytes;
+    if ((recvbytes = static_cast<int>(recv(fd, buf, static_cast<size_t>(maxsize), 0))) == -1) {
+        perror("recv error");
+        return -1;
+    }
+    return recvbytes;
+}

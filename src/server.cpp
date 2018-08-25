@@ -22,10 +22,8 @@ int echoserver::main() {
     i_bind(listen_fd, reinterpret_cast<const sockaddr *>(&my_addr), sizeof(struct sockaddr));
 
     // listen
-    if (listen(listen_fd, 20) == -1) {
-        perror("* listen error");
-        exit(1);
-    }
+    i_listen(listen_fd, 20);
+
     printf("* Echo server start succeed, listen port: %d\n", SERVER_PORT);
 
     int sin_size;
@@ -45,9 +43,10 @@ int echoserver::main() {
         if (pid == 0) {
             // son process
             char buf[1000] = {0};
-            auto recvbytes = static_cast<int>(recv(client_fd, buf, 1000, 0));
+            int recvbytes = i_recv(client_fd, buf, 1000);
             buf[recvbytes] = '\0';
             printf("* \tmessage is: %s\n", buf);
+
             char * msg = buf;
             if (send(client_fd, msg, static_cast<size_t>(recvbytes), 0) == -1) {
                 printf("* send error");

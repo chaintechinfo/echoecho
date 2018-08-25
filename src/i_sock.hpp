@@ -19,7 +19,11 @@ namespace echosock {
     // i_bind
     int i_bind(int fd, const struct sockaddr * addr, int namelen);
 
+    // i_listen
+    int i_listen(int fd, int n);
+
     // i_recv
+    int i_recv(int fd, void *buf, int maxsize);
 
 }
 

@@ -15,9 +15,9 @@
 
 namespace echoserver {
 
-    using namespace echosock;
+    #define SERVER_PORT 6666
 
-#define SERVER_PORT 6666
+    using namespace echosock;
 
     // start server
     int main();

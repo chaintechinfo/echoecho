@@ -14,6 +14,7 @@
 #include "i_sock.hpp"
 
 namespace echoclient {
+    void send_recv(sockaddr_in &server_addr, char* msg);
 
     void main(char* addr, char* port);
 }
