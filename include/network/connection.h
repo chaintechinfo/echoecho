@@ -20,12 +20,16 @@ namespace echoecho {
     class Connection :
             boost::enable_shared_from_this<Connection> {
     public:
-        typedef boost::shared_ptr<tcp_connection> pointer;
+
+        Connection( boost::asio::io_service& io_service, Router * r );
 
         ~Connection();
 
+        // Get the connection underlying socket
+        tcp::socket& socket();
+
     private:
-        Connection(io_service &io);
+        // Connection(io_service &io);
 
         // underlying socket
         tcp::socket _socket;
