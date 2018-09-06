@@ -103,6 +103,12 @@ int main(int argc, char** argv) {
     // e.g. > ./echoecho -p 5555 --p2p-peer-address 192.168.1.96:5555
     cxxopts::Options options(argv[0], " - command line options");
     options.positional_help("[optional args]").show_positional_help();
+    bool apple = false;
+    options.add_options()
+            ("f,file", "File name", cxxopts::value<std::string>(), "");
+    options.add_options()
+            ("help", "Print help", cxxopts::value<std::string>(), "Help");
+    options.parse_positional({"input", "output", "positional"});
     auto result = options.parse(argc, argv);
     // the network must have many peers
     //peer p;
