@@ -5,21 +5,22 @@
 #ifndef ECHOECHO_PEER_H
 #define ECHOECHO_PEER_H
 
+#include <iostream>
 #include <vector>
 #include <string>
 
 namespace echoecho {
     using namespace std;
 
-    class peer {
+    class node {
     public:
-        peer();
-        ~peer();
+        node();
+        ~node();
 
         // start a peer server
-        void start();
+        void start_listening();
     private:
-        // connection to others
+        // connection to others todo
         vector<string> _connections;
     };
 }
