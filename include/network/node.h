@@ -9,19 +9,29 @@
 #include <vector>
 #include <string>
 
+#include "network/network.h"
+
 namespace echoecho {
     using namespace std;
 
     class node {
     public:
-        node();
+        node(network &p2p);
         ~node();
+
+        // Get p2p network
+        network& p2p() {
+            return _p2p;
+        }
 
         // start a peer server
         void start_listening();
     private:
         // connection to others todo
         vector<string> _connections;
+
+        // p2p network
+        network _p2p;
     };
 }
 

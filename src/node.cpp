@@ -6,12 +6,15 @@
 
 namespace echoecho {
 
-    node::node() {}
+    node::node(network &p2p)
+            : _p2p(p2p) {
+    }
 
     node::~node() {}
 
     void node::start_listening() {
-        cout << "Start node rpc" << endl;
+        cout << "Start the node server" << endl;
+        _p2p.awake();
     }
 
 }

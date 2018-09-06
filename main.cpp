@@ -51,7 +51,8 @@ int main(int argc, char** argv) {
     }
 
     // the network must have many peers
-    echoecho::node s_node;
+    echoecho::network network(static_cast<uint16_t>(s_port));
+    echoecho::node s_node(network);
     s_node.start_listening();
 
     // input
@@ -60,7 +61,9 @@ int main(int argc, char** argv) {
     std::getline(std::cin, message);
     while (message != "/q") {
         // broadcast
-        std::cout << "Received: " << message << std::endl;
+        network.broadcast(message);
+        std::cout << "Broadcast: " << message << std::endl;
+
         std::cout << "Enter message -> ";
         std::getline(std::cin, message);
     }

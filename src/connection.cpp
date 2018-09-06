@@ -5,11 +5,21 @@
 #include "network/connection.h"
 
 namespace echoecho {
-    Connection::Connection(boost::asio::io_service &io_service, Router *r) : _socket(io_service) {
+
+    connection::connection(uint16_t port)
+            : _io_service{},
+              _socket(_io_service),
+              _acceptor(_io_service, tcp::endpoint(tcp::v4(), port)) {
+    }
+
+    connection::connection(boost::asio::io_service &io_service, uint16_t port)
+            : _io_service(io_service),
+              _socket(_io_service),
+              _acceptor(_io_service, tcp::endpoint(tcp::v4(), port)) {
 
     }
 
-    tcp::socket& Connection::socket() {
+    tcp::socket& connection::socket() {
         return _socket;
     }
 }
