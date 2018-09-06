@@ -61,7 +61,8 @@ namespace echoecho {
         virtual const short hops() const { return m_header.hops; }
         virtual const string& guid() const {
             if (m_guid.empty()) {
-                m_guid = string(m_header.guid, 36);
+                // TODO
+                // m_guid = ""; // string(m_header.guid, 36);
             }
             return m_guid;
         }
@@ -87,9 +88,10 @@ namespace echoecho {
 
         virtual vector<boost::asio::const_buffer> to_buffers() const {
             vector<boost::asio::const_buffer> buffers;
-            buffers.push_back(boost::asio::const_buffer(
+            // TODO
+            /*buffers.push_back(boost::asio::const_buffer(
                     (char *)m_header, sizeof(m_header)
-            ));
+            ));*/
 
             if (length()) {
                 buffers.push_back(

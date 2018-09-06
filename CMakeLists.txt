@@ -43,4 +43,4 @@ add_library(echo STATIC ${SRC_FILES})
 
 add_executable(echoecho main.cpp)
 
-target_link_libraries(echoecho echo)
+target_link_libraries(echoecho echo ${Boost_LIBRARIES})
