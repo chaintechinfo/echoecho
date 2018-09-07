@@ -27,8 +27,10 @@ FILE(GLOB HEADERS
 INCLUDE_DIRECTORIES(
         ${HEADERS}
         ${Boost_INCLUDE_DIRS}
+        include
 )
-include_directories(include)
+#FILE(GLOB INCLUDES "${PROJECT_SOURCE_DIR}/include")
+#include_directories(${INCLUDES})
 
 link_directories(
         ${Boost_LIBRARY_DIRS}

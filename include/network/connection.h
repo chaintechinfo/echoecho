@@ -32,11 +32,7 @@ namespace echoecho {
         tcp::socket& socket();
 
     private:
-        connection( uint16_t port );
         connection( boost::asio::io_service &io_service, uint16_t port );
-
-        // io service
-        boost::asio::io_service _io_service;
 
         // underlying socket
         tcp::socket _socket;
