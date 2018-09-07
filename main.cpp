@@ -8,10 +8,27 @@
 #include <cassert>
 #include <iostream>
 #include <string>
+#include <boost/thread/thread.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
 #include "utils/cxxopts.h"
 #include "network/node.h"
 
+std::string lame_uuid_gen() {
+    boost::uuids::random_generator gen;
+    boost::uuids::uuid uuid = gen();
+    // #include <boost/lexical_cast.h>
+    // boost::lexical_cast<std::string>(uuid);
+    return boost::uuids::to_string(uuid);
+}
+
+void io_run(boost::asio::io_service * ios) {
+    std::cout << "Start async ..." << std::endl;
+    ios->run();
+    std::cout << "RPC io service closed" << std::endl;
+}
 
 int main(int argc, char** argv) {
 
@@ -44,29 +61,53 @@ int main(int argc, char** argv) {
 
     // std::cout << "Server listening on " << s_port << std::endl;
 
-    if (result.count("p2p-peer-address")) {
+    /*if (result.count("p2p-peer-address")) {
         std::cout << peer_vector.size() << std::endl;
         std::cout << peer_vector[0] << std::endl;
-        std::cout << peer_vector[1] << std::endl;
-    }
+    }*/
 
+    using namespace echoecho;
     // the network must have many peers
-    echoecho::network network(static_cast<uint16_t>(s_port));
-    echoecho::node s_node(network);
-    s_node.start_listening();
+    boost::asio::io_service ios;
+    std::cout << "Listening on " << s_port << std::endl;
+    boost::shared_ptr<boost::asio::ip::tcp::acceptor> acceptor_ptr(
+            new boost::asio::ip::tcp::acceptor(
+                    ios,
+                    boost::asio::ip::tcp::endpoint(
+                            boost::asio::ip::tcp::v4(),
+                            static_cast<unsigned short>(s_port)
+                    )
+            )
+    );
+    node s_node(acceptor_ptr, boost::bind(&lame_uuid_gen));
+    boost::thread t( boost::bind(&io_run, &ios) );
 
     // input
     std::string message;
     std::cout << "Enter message -> ";
     std::getline(std::cin, message);
     while (message != "/q") {
+
+        std::vector<std::string> parts;
+        boost::split(parts, message, boost::is_any_of(" "));
+
+        if (parts[0] == "connect" && parts.size() == 3) {
+            boost::asio::ip::address host = boost::asio::ip::address::from_string(parts[1]);
+            auto port = static_cast<unsigned short>(atoi(parts[2].c_str()));
+            boost::asio::ip::tcp::endpoint ep(host, port);
+            s_node.connect_to_remote( ep );
+        }
+
         // broadcast
-        network.broadcast(message);
+        // network.broadcast(message);
+        //s_node.send_all(message);
         std::cout << "Broadcast: " << message << std::endl;
 
         std::cout << "Enter message -> ";
         std::getline(std::cin, message);
     }
+
+    t.join();
 
     return 0;
 }

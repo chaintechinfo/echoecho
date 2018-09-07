@@ -8,7 +8,6 @@
 #include <iostream>
 #include <string>
 
-#include "network/connection.h"
 
 namespace echoecho {
     using namespace std;
@@ -22,12 +21,16 @@ namespace echoecho {
 
         // Startup the network if non running
         void awake();
+
+        uint16_t port() {
+            return _port;
+        }
     private:
         // the port that self node listen on this network
         uint16_t _port;
 
         // self connection
-        connection::connection_ptr _self_conn_ptr;
+        // connection::connection_ptr _self_conn_ptr;
 
         // running or not
         bool _running;

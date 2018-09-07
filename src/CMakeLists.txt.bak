@@ -1,6 +1,0 @@
-
-FILE(GLOB HEADERS "${PROJECT_SOURCE_DIR}/include/network/*.h")
-
-aux_source_directory(. SRC)
-
-add_library(echo ${SRC} ${HEADERS})

@@ -1,13 +1,11 @@
 //
-// Created by niushaohan on 2018/8/23.
+// Created by shniu on 18-9-7.
 //
-#pragma once
 
-#ifndef ECHOECHO_UTILS_HPP
-#define ECHOECHO_UTILS_HPP
+#ifndef ECHOECHO_ECHO_UTILS_H
+#define ECHOECHO_ECHO_UTILS_H
 
-#include <cstdio>
-#include <cstring>
+#include <iostream>
 #include <string>
 
 namespace echoutils {
@@ -22,4 +20,4 @@ namespace echoutils {
     void message(int len);
 }
 
-#endif //ECHOECHO_UTILS_HPP
+#endif //ECHOECHO_ECHO_UTILS_H

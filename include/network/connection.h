@@ -1,46 +1,50 @@
 //
-// Created by shniu on 18-9-3.
+// Created by shniu on 18-9-7.
 //
 
 #ifndef ECHOECHO_CONNECTION_H
 #define ECHOECHO_CONNECTION_H
 
 #include <iostream>
+#include <string>
 #include <boost/asio.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/shared_ptr.hpp>
-
-// #include "network/message.h"
 
 namespace echoecho {
+    using namespace std;
 
     using boost::asio::io_service;
     using boost::asio::ip::tcp;
 
-    class connection :
-            boost::enable_shared_from_this<connection> {
+    class connection {
     public:
-        typedef boost::shared_ptr<connection> connection_ptr;
+        connection(io_service &ios);
 
-        static connection_ptr create(boost::asio::io_service& io_service, uint16_t port) {
-            return connection_ptr(new connection(io_service, port));
-        }
-
-        ~connection();
-
-        // Get the connection underlying socket
         tcp::socket& socket();
 
-    private:
-        connection( boost::asio::io_service &io_service, uint16_t port );
+        // Setup a call to read the next msg_header
+        void async_read();
 
-        // underlying socket
+        void set(const string &k, const string &v) {
+            boost::mutex::scoped_lock lk(m_props_mutex);
+            m_props[k] = v;
+        }
+
+        string get(const string& k) {
+            boost::mutex::scoped_lock lk(m_props_mutex);
+            if( m_props.find(k) == m_props.end() )
+                return "";
+
+            return m_props[k];
+        }
+
+    private:
         tcp::socket _socket;
 
-        // acceptor
-        tcp::acceptor _acceptor;
-    };
+        boost::mutex m_props_mutex;
+        map<string, string> m_props;
 
-}
+    };  // class connection
+
+} // echoecho
 
 #endif //ECHOECHO_CONNECTION_H
