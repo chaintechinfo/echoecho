@@ -17,6 +17,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+#include "network/message.h"
 #include "network/connection.h"
 
 namespace echoecho {
@@ -54,15 +55,8 @@ namespace echoecho {
                             tcp::endpoint &ep,
                             connection_ptr conn);
 
-        void send_all(const std::string &message);
-
-        // start a peer server
-        void start_listening();
-
-        // set other peer
-        void set_peers(vector<string> &peers) {
-            _peers = peers;
-        }
+        // send msg to all node that connected
+        void send_all(message_ptr msg_ptr);
     private:
         /// keep track of connection
         void register_connection( connection_ptr conn );

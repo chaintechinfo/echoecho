@@ -98,10 +98,16 @@ int main(int argc, char** argv) {
             s_node.connect_to_remote( ep );
         }
 
+        if (parts[0] == "ping") {
+            // string msg = "ping";
+            message_ptr msg_ptr;  // todo Message
+            s_node.send_all(msg_ptr);
+        }
+
         // broadcast
         // network.broadcast(message);
-        //s_node.send_all(message);
-        std::cout << "Broadcast: " << message << std::endl;
+        // s_node.send_all(message);
+        // std::cout << "Broadcast: " << message << std::endl;
 
         std::cout << "Enter message -> ";
         std::getline(std::cin, message);

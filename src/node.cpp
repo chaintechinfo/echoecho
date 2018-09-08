@@ -52,9 +52,10 @@ namespace echoecho {
             new_conn->set(iter->first, iter->second);
         }
 
-        // Start an asynchronous connect operation
+        // Start an asynchronous connect operation.
+        // call handle_connect when connect succeed
         new_conn->socket().async_connect(ep, boost::bind(
-                &node::handle_connect,
+                &node::handle_connect,   // callback, support by boost.asio and os
                 this,
                 boost::asio::placeholders::error,
                 ep,
@@ -68,6 +69,8 @@ namespace echoecho {
                  << e.message() << std::endl;
             return;
         }
+
+        cout << "Connect succeed." << endl;
 
         // Successfully established connection
         // todo m_protocol->new_outgoing_connection( conn );
@@ -90,8 +93,30 @@ namespace echoecho {
     }*/
 
     void node::handle_accept(const boost::system::error_code &error, connection_ptr conn) {
+
+        if (error) {
+            cerr << error.message() << endl;
+            return;
+        }
+
         std::cout << "Accept a message from remote"
                   << std::endl;
+
+        // register conn
+        register_connection( conn );
+        conn->async_read();
+
+        // Start an accept operation for a new connection.
+        connection_ptr new_conn = new_connection();
+        _acceptor_ptr->async_accept(
+                new_conn->socket(),
+                boost::bind(
+                        &node::handle_accept,
+                        this,
+                        boost::asio::placeholders::error,
+                        new_conn
+                )
+        );
     }
 
     /// private
@@ -109,12 +134,14 @@ namespace echoecho {
         m_connections.push_back(conn);
     }
 
-    /*void node::start_listening() {
-        accept();
-        cout << "Start the node server async accept" << endl;
-        _ios.run();
-        // _p2p.awake();
-    }*/
+    void node::send_all(message_ptr msg_ptr) {
+        boost::mutex::scoped_lock lk(m_connections_mutex);
+        auto iter = m_connections.begin();
+        for (; iter != m_connections.end(); ++iter) {
+            //*iter->async_write();
+            iter->get()->async_write( msg_ptr );
+        }
+    }
 
     /*void node::send_all(const std::string &message) {
         std::cout << "Send the message to all that connected, the message is: "
