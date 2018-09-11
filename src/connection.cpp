@@ -2,24 +2,72 @@
 // Created by shniu on 18-9-7.
 //
 
+#include "network/node.h"
 #include "network/connection.h"
 
 namespace echoecho {
-    connection::connection(io_service &ios) : _socket(ios) {}
+    connection::connection(io_service &ios, node * n)
+            : _socket(ios),
+              m_shutting_down(false),
+              m_node(n) {
+        max_write_qsize = 20 * 1024;
+        cout << "New connection ..." << endl;
+    }
+
+    connection::~connection() {
+        cout << "The connection shutting down" << endl;
+    }
+
+    void connection::close() {
+        socket().close();
+    }
+
+    void connection::fin() {
+        if (m_shutting_down) {
+            return;
+        }
+
+        m_shutting_down = true;
+        cout << "FIN connection " << str() << endl;
+        m_node->connection_terminated(shared_from_this());
+        close();
+    }
+
+    string connection::str() const {
+        ostringstream os;
+        os   << "[Connection: '" << m_name << "' ";
+
+        if (_socket.is_open()) {
+            try {
+                os << _socket.remote_endpoint().address().to_string()
+                   << ":"
+                   << _socket.remote_endpoint().port();
+            } catch (...) {
+
+            }
+        }
+
+        os << "]";
+        return os.str();
+    }
 
     tcp::socket& connection::socket() {
         return _socket;
     }
 
     void connection::async_read() {
+
+        if (m_shutting_down)
+            return;
+
         message_ptr msg_p(new message());
 
         // first to read header, then the payload body
         boost::asio::async_read(
                 _socket,
                 boost::asio::buffer(
-                        &msg_p->header(),
-                        sizeof(msg_p)
+                        (char *)&msg_p->header(),
+                        sizeof(message_header)
                 ),
                 boost::bind(
                         &connection::handle_read_header,
@@ -32,11 +80,15 @@ namespace echoecho {
 
     void connection::handle_read_header(const boost::system::error_code &error, message_ptr msg_ptr) {
 
+        if (m_shutting_down) {
+            return;
+        }
+
         if (error) {
             std::cerr << "err " << error.value() << " handle_read_header: "
                       << error.message() << std::endl;
-            // todo 异常出错做些关闭操作
-            // fin();
+            // 异常出错做些关闭操作
+            fin();
             return;
         }
 

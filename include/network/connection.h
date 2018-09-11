@@ -23,9 +23,18 @@ namespace echoecho {
 
     class connection : public boost::enable_shared_from_this<connection> {
     public:
-        connection(io_service &ios);
+        connection(io_service &ios, node * n);
+
+        ~connection();
 
         tcp::socket& socket();
+
+        // close
+        void close();
+        void fin();
+
+        // str
+        string str() const ;
 
         // Setup a call to read the next msg_header
         void async_read();
@@ -53,6 +62,7 @@ namespace echoecho {
     private:
         tcp::socket _socket;
 
+        string m_name;
         boost::mutex m_props_mutex;
         map<string, string> m_props;
 
@@ -61,6 +71,13 @@ namespace echoecho {
         // queue of outgoing messages
         deque< message_ptr > m_write_q;
         size_t m_wite_qsize;
+        // max number of bytes in the queue
+        size_t max_write_qsize;
+
+        // node
+        node * m_node;
+
+        bool m_shutting_down;
 
     };  // class connection
 

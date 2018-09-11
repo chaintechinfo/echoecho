@@ -5,11 +5,13 @@
 #include <utility>
 
 #include "network/node.h"
+#include "network/protocol.h"
 
 namespace echoecho {
 
-    node::node(boost::shared_ptr<tcp::acceptor> acceptor_ptr, boost::function<std::string()> uuidf)
+    node::node(boost::shared_ptr<tcp::acceptor> acceptor_ptr, protocol * p, boost::function<std::string()> uuidf)
             : _acceptor_ptr(std::move(acceptor_ptr)),
+              m_protocol(p),
               _uuid_gen(std::move(uuidf)),
               seen_connections(0) {
         cout << "Testing uuid generator... " << flush;
@@ -20,6 +22,8 @@ namespace echoecho {
         }
 
         cout << "OK" << endl;
+
+        p->set_node( this );
 
         // Start an accept operation for a new connection.
         connection_ptr new_conn = new_connection();
@@ -32,7 +36,7 @@ namespace echoecho {
     }
 
     connection_ptr node::new_connection() {
-        return connection_ptr( new connection(_acceptor_ptr->get_io_service()) );
+        return connection_ptr( new connection( _acceptor_ptr->get_io_service(), this ) );
     }
 
     void node::connect_to_remote(tcp::endpoint &ep) {
@@ -42,9 +46,9 @@ namespace echoecho {
 
     void node::connect_to_remote(tcp::endpoint &ep, const map<string, string> &props) {
         cout << "router::connect_to_remote("
-             << ep.address().to_string() <<":"
-             << ep.port() << ")"
+             << ep.address().to_string() <<":" << ep.port() << ")"
              << endl;
+
         connection_ptr new_conn = new_connection();
         auto iter = props.begin();
         auto end = props.end();
@@ -73,24 +77,12 @@ namespace echoecho {
         cout << "Connect succeed." << endl;
 
         // Successfully established connection
-        // todo m_protocol->new_outgoing_connection( conn );
+        m_protocol->new_outgoing_connection( conn );
         register_connection(conn);
 
         // start read loop for this connection
         conn->async_read();
     }
-
-    /*void node::accept() {
-        socket_ptr socket(new tcp::socket(_ios));
-        _acceptor.async_accept(
-                *socket,
-                boost::bind(
-                        &node::handle_accept,
-                        this,
-                        boost::asio::placeholders::error
-                )
-        );
-    }*/
 
     void node::handle_accept(const boost::system::error_code &error, connection_ptr conn) {
 
@@ -99,12 +91,18 @@ namespace echoecho {
             return;
         }
 
-        std::cout << "Accept a message from remote"
-                  << std::endl;
+        // protocol hook
+        if (m_protocol->new_incoming_connection(conn)) {
+            std::cout << "Accept a message from remote"
+                      << std::endl;
 
-        // register conn
-        register_connection( conn );
-        conn->async_read();
+            // register conn
+            register_connection( conn );
+            conn->async_read();
+        } else {
+            std::cout << "Reject a connection from the client"
+                      << std::endl;
+        }
 
         // Start an accept operation for a new connection.
         connection_ptr new_conn = new_connection();
@@ -140,6 +138,26 @@ namespace echoecho {
         for (; iter != m_connections.end(); ++iter) {
             //*iter->async_write();
             iter->get()->async_write( msg_ptr );
+        }
+    }
+
+    string node::gen_uuid() {
+        return _uuid_gen();
+    }
+
+    void node::connection_terminated(connection_ptr conn) {
+        unregister_connection( conn );
+        m_protocol->connection_terminated( conn );
+    }
+
+    void node::unregister_connection(connection_ptr conn) {
+        boost::mutex::scoped_lock lk(m_connections_mutex);
+        auto itr = m_connections.begin();
+        for (; itr != m_connections.end(); ++itr) {
+            if (*itr == conn) {
+                m_connections.erase( itr );
+                // break;
+            }
         }
     }
 

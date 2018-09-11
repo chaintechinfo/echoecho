@@ -15,6 +15,7 @@
 
 #include "utils/cxxopts.h"
 #include "network/node.h"
+#include "network/my_message.h"
 
 std::string lame_uuid_gen() {
     boost::uuids::random_generator gen;
@@ -99,8 +100,9 @@ int main(int argc, char** argv) {
         }
 
         if (parts[0] == "ping") {
-            // string msg = "ping";
-            message_ptr msg_ptr;  // todo Message
+            string uuid = s_node.gen_uuid();
+            cout << "uuid: " << uuid << endl;
+            message_ptr msg_ptr = message_ptr(new PingMessage(uuid));
             s_node.send_all(msg_ptr);
         }
 

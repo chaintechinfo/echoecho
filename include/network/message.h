@@ -6,11 +6,13 @@
 #define ECHOECHO_MESSAGE_H
 
 #include <iostream>
+#include <string>
 #include <boost/shared_ptr.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/buffer.hpp>
 
 namespace echoecho {
+    using namespace std;
 
     // All messages start with this header
     struct message_header {
@@ -48,7 +50,7 @@ namespace echoecho {
             os  << "[Msg type:" << (int)type()
                 << " ttl:" << (int)ttl()
                 << " hops:" << (int)hops()
-                << " length:" << (int)length()
+                << " length:" << (int)payload_length()
                 << " guid:" << guid() << "]";
             return os.str();
         }
@@ -102,7 +104,7 @@ namespace echoecho {
             return buffers;
         }
 
-    private:
+    protected:
         // message header
         message_header _header;
         // msg guid
@@ -113,6 +115,23 @@ namespace echoecho {
 
     // smart pointer
     typedef boost::shared_ptr<message> message_ptr;
-}
+
+    class GeneralMessage : public message {
+    public:
+        GeneralMessage(const char msgtype, const std::string& body, const std::string& uuid) {
+            message_header h;
+            memcpy(&h.guid, uuid.c_str(), 36);
+            h.type = msgtype;
+            h.ttl = 1;
+            h.hops = 0;
+            h.length = htonl(body.length());   // body.length();
+            _header = h;
+            malloc_payload();
+            // _payload = body;
+            memcpy(_payload, body.data(), body.length());
+        }
+    };
+
+} // echoecho
 
 #endif //ECHOECHO_MESSAGE_H

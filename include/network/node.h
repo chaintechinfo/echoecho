@@ -22,6 +22,8 @@
 
 namespace echoecho {
 
+    class protocol;
+
     //class connection;
     typedef boost::shared_ptr<connection> connection_ptr;
 
@@ -35,7 +37,7 @@ namespace echoecho {
     class node {
     public:
         // node(network &p2p);
-        node(boost::shared_ptr<tcp::acceptor> acceptor_ptr, boost::function<std::string()> uuidf);
+        node(boost::shared_ptr<tcp::acceptor> acceptor_ptr, protocol * p, boost::function<std::string()> uuidf);
         ~node();
 
         void accept();
@@ -45,6 +47,7 @@ namespace echoecho {
 
         // new connection
         connection_ptr new_connection();
+        void connection_terminated( connection_ptr conn);
 
         // connect
         void connect_to_remote(tcp::endpoint &ep);
@@ -57,16 +60,20 @@ namespace echoecho {
 
         // send msg to all node that connected
         void send_all(message_ptr msg_ptr);
+
+        // gen uuid
+        string gen_uuid();
     private:
         /// keep track of connection
         void register_connection( connection_ptr conn );
+        void unregister_connection( connection_ptr conn );
 
         // connection to others
         vector<connection_ptr> m_connections;
         boost::mutex m_connections_mutex;
 
-        // p2p network
-        // network _p2p;
+        // protocol implementation
+        protocol * m_protocol;
 
         // acceptor
         boost::shared_ptr<boost::asio::ip::tcp::acceptor> _acceptor_ptr;
