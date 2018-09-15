@@ -124,10 +124,9 @@ namespace echoecho {
             h.type = msgtype;
             h.ttl = 1;
             h.hops = 0;
-            h.length = htonl(body.length());   // body.length();
+            h.length = htonl(body.length());
             _header = h;
             malloc_payload();
-            // _payload = body;
             memcpy(_payload, body.data(), body.length());
         }
     };
